@@ -130,12 +130,17 @@ func getFileTypeToSearch(searchPath string) string {
 }
 
 func copyFileContents(src, dst string) (err error) {
+	filename := src[strings.LastIndex(src, "/")+1 : len(src)]
+
 	in, err := os.Open(src)
 	if err != nil {
 		return
 	}
 	defer in.Close()
-	out, err := os.Open(dst)
+	destination := dst + "/" + filename
+	fmt.Printf("Destination is %v \n", destination)
+
+	out, err := os.OpenFile(destination, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		return
 	}
@@ -148,6 +153,7 @@ func copyFileContents(src, dst string) (err error) {
 	if _, err = io.Copy(out, in); err != nil {
 		return
 	}
+
 	err = out.Sync()
 	return
 }
