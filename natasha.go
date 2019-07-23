@@ -3,11 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"natasha/constants"
-	"net/http"
+	"natasha/utils"
 	"os"
 	"runtime"
 	"strings"
@@ -40,19 +39,19 @@ func searchFileSystem(startingPoint, outputPath, filetype string) {
 			searchFileSystem(startingPoint+"/"+file.Name(), outputPath, filetype)
 		}
 	} else {
-		contentType, _ := detectContentType(startingPoint)
+		contentType, _ := utils.DetectContentType(startingPoint)
 		switch filetype {
 		case constants.FILE_TYPES[0]:
 			{
 				if strings.Contains(contentType, constants.FILE_TYPES_MAP[filetype]) {
 					fmt.Println(startingPoint + " : " + contentType)
-					copyFileContents(startingPoint, outputPath)
+					utils.CopyFileContents(startingPoint, outputPath)
 				}
 			}
 		case constants.FILE_TYPES[1]:
 			{
 				if strings.Contains(contentType, constants.FILE_TYPES_MAP[filetype]) {
-					copyFileContents(startingPoint, outputPath)
+					utils.CopyFileContents(startingPoint, outputPath)
 				}
 			}
 		default:
@@ -63,22 +62,6 @@ func searchFileSystem(startingPoint, outputPath, filetype string) {
 
 	}
 
-}
-
-func detectContentType(filePath string) (string, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return "", err
-	}
-
-	buffer := make([]byte, 512)
-	_, err2 := file.Read(buffer)
-	if err2 != nil {
-		return "", err2
-	}
-
-	contentType := http.DetectContentType(buffer)
-	return contentType, nil
 }
 
 func getRootPath() (string, string) {
@@ -127,33 +110,4 @@ func getFileTypeToSearch(searchPath string) string {
 	fmt.Printf("Scanning for %v files in %v\n", constants.FILE_TYPES[i-1], searchPath)
 	return constants.FILE_TYPES[i-1]
 
-}
-
-func copyFileContents(src, dst string) (err error) {
-	filename := src[strings.LastIndex(src, "/")+1 : len(src)]
-
-	in, err := os.Open(src)
-	if err != nil {
-		return
-	}
-	defer in.Close()
-	destination := dst + "/" + filename
-	fmt.Printf("Destination is %v \n", destination)
-
-	out, err := os.OpenFile(destination, os.O_RDWR|os.O_CREATE, 0666)
-	if err != nil {
-		return
-	}
-	defer func() {
-		cerr := out.Close()
-		if err == nil {
-			err = cerr
-		}
-	}()
-	if _, err = io.Copy(out, in); err != nil {
-		return
-	}
-
-	err = out.Sync()
-	return
 }

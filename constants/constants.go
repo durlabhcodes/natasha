@@ -2,7 +2,7 @@ package constants
 
 const (
 	LINUX_ROOT               = "/"
-	DEFAULT_LINUX_OUTPUT_DIR = "/tmp/natasha"
+	DEFAULT_LINUX_OUTPUT_DIR = "/Users/DSharma/Documents/natasha"
 )
 
 var FILE_TYPES = []string{"PDF", "Images"}
